@@ -10,14 +10,17 @@ namespace hamada.Repo
 {
     public class UserRepository(AppDbContext Context) : IUserRepository
     {
-        public Task<User> CreateUser(string username, string password)
+        public async Task<User> CreateUser(string username, string password)
         {
-            var newUser = 
+            User newUser = new()
             {
-                newUser.Username = username,
+                Username = username,
+                Password = password,
 
             };
-
+            await Context.AddAsync(newUser);
+            await Context.SaveChangesAsync();
+            return newUser;
 
         }
 
