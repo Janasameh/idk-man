@@ -10,7 +10,7 @@ namespace hamada.models
     {
         [Key]
         public int Id { set; get; }
-        public required string  Username { set; get; }
+        public required string Username { set; get; }
         public required string Password { set; get; }
 
     }
