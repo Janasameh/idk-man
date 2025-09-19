@@ -21,8 +21,8 @@ namespace hamada.Controllers
         }
 
         [HttpGet]
-        [Route("/userprofile")]
-        public async Task<ActionResult<User>?> GetUser(int id)
+        [Route("/userprofile/{id}")]
+        public async Task<ActionResult<User?>> GetUser([FromRoute] int id)
         {
             return await repo.GetUser(id);
         }
