@@ -30,5 +30,10 @@ namespace hamada.Repo
             return await Context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
         }
+
+        public async Task<List<User>?> GetUsers()
+        {
+            return await Context.Users.ToListAsync();
+        }
     }
 }
