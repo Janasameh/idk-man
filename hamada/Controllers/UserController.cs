@@ -6,6 +6,7 @@ using hamada.models;
 using hamada.Repo;
 using hamada.RequestModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace hamada.Controllers
 {
@@ -15,6 +16,7 @@ namespace hamada.Controllers
     {
         [HttpGet]
         [Route("")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<User>?>> GetUsers()
         {
             return await repo.GetUsers();
@@ -22,6 +24,7 @@ namespace hamada.Controllers
 
         [HttpGet]
         [Route("/userprofile/{id}")]
+        [Authorize]
         public async Task<ActionResult<User?>> GetUser([FromRoute] int id)
         {
             return await repo.GetUser(id);
