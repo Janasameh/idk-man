@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace hamada.models
 {
@@ -10,8 +11,11 @@ namespace hamada.models
     {
         [Key]
         public int Id { set; get; }
+        public required string Email { set; get; }
+        public required string Phone { set; get; }
         public required string Username { set; get; }
         public required string Password { set; get; }
+        public  string Role { set; get; } = "User";
 
     }
 }

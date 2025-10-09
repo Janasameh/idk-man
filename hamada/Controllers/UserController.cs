@@ -7,12 +7,17 @@ using hamada.Repo;
 using hamada.RequestModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using hamada.Services;
 
 namespace hamada.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(IUserRepository repo) : ControllerBase
+    public class UserController(IUserRepository repo, IPasswordService passwordService) : ControllerBase
     {
         [HttpGet]
         [Route("")]
@@ -29,14 +34,13 @@ namespace hamada.Controllers
         {
             return await repo.GetUser(id);
         }
+       
 
-        [HttpPost]
-        [Route("")]
-        public async Task<ActionResult<User>> CreateUser( [FromBody] CreateUserRequestModel request )
-        {
-          
-            return await repo.CreateUser(request.Username, request.Password);
-        }
+
+
+
+
+      
 
     }
 }
