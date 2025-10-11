@@ -12,13 +12,27 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder
 builder.Services.AddControllers();
 builder.Services.AddOpenApi(); // built-in OpenAPI generator
 
+// Register application services
+builder.Services.AddScoped<hamada.Repo.IUserRepository, hamada.Repo.UserRepository>();
+builder.Services.AddScoped<hamada.Services.IPasswordService, hamada.Services.PasswordService>();
+
 var jwtSettings = builder.Configuration.GetSection("jwt");
 var jwtKey = jwtSettings["key"];
 if (string.IsNullOrEmpty(jwtKey))
 {
     throw new InvalidOperationException("JWT key is missing in configuration.");
 }
-var key = Encoding.UTF8.GetBytes(jwtKey);
+// Expect jwt:key to be a base64-encoded 32+ byte secret. Decode here.
+byte[] key;
+try
+{
+    key = Convert.FromBase64String(jwtKey);
+}
+catch (FormatException)
+{
+    // Fall back to UTF8 bytes if the key is not base64 (but prefer base64 in production)
+    key = Encoding.UTF8.GetBytes(jwtKey);
+}
 
 builder.Services.AddAuthentication("Bearer")
 .AddJwtBearer("Bearer", options =>

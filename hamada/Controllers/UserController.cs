@@ -17,7 +17,7 @@ namespace hamada.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(IUserRepository repo, IPasswordService passwordService) : ControllerBase
+    public class UserController(IUserRepository repo ) : ControllerBase
     {
         [HttpGet]
         [Route("")]

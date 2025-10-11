@@ -1,27 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 using hamada.Repo;
 using hamada.RequestModels;
 using hamada.ResponseModels;
 using hamada.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
-namespace hamada.Controllers
+namespace YourApp.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController(IUserRepository repo, IPasswordService passwordService, IConfiguration config) : ControllerBase
+    public class AuthController(IUserRepository repo,IPasswordService passwordService, IConfiguration config) : ControllerBase
     {
-        [HttpPost]
-        [Route("/register")]
-        public async Task<ActionResult> Register([FromBody] RegisterRequestModel request, RegisterResponseModel response)
-        {
+        [HttpPost("register")]
+        public async Task<ActionResult<RegisterResponseModel>> Register([FromBody] RegisterRequestModel request)
+        { 
             var existingUser = await repo.GetUserByUsername(request.Username);
             if (existingUser != null)
             {
@@ -30,42 +25,67 @@ namespace hamada.Controllers
 
             var hashedPassword = passwordService.HashPassword(request.Password);
             var newUser = await repo.CreateUser(request.Username, hashedPassword, request.Email, request.Phone);
-            return Ok(new { response.Id, response.Username });
+
+            var response = new RegisterResponseModel
+            {
+                Id = newUser.Id.ToString(),
+                Username = newUser.Username
+            };
+
+            return Ok(response);
         }
 
-        public async Task<ActionResult> Login([FromBody] LoginRequestModel request)
+        [HttpPost("login")]
+        public async Task<ActionResult<LoginResponseModel>> Login([FromBody] LoginRequestModel request)
         {
             var existingUser = await repo.GetUserByUsername(request.username);
-            if (existingUser == null || passwordService.VerifyPassword(existingUser.Password, request.password) == false)
+            if (existingUser == null || !passwordService.VerifyPassword(existingUser.Password, request.password))
             {
                 return Unauthorized("Invalid username or password.");
             }
-            return Ok("welcome dear user");
 
+            var token = GenerateJwtToken(existingUser.Username!, existingUser.Role ?? "User");
+            return Ok(new LoginResponseModel
+            {
+                Id = existingUser.Id.ToString(),
+                Username = existingUser.Username,
+                Token = token
+            });
         }
 
-        private string GenerateJwtToken(string username)
+        private string GenerateJwtToken(string username, string role)
         {
             var jwtSettings = config.GetSection("jwt");
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["key"]!));
+            var keyString = jwtSettings["key"]!;
+
+            byte[] keyBytes;
+            try
+            {
+                keyBytes = Convert.FromBase64String(keyString);
+            }
+            catch (FormatException)
+            {
+                keyBytes = Encoding.UTF8.GetBytes(keyString);
+            }
+
+            var key = new SymmetricSecurityKey(keyBytes);
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
-        {
-            new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.Role, "Admin")
-        };
+            {
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Role, role)
+            };
 
             var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
+                issuer: jwtSettings["issuer"],
+                audience: jwtSettings["audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
+                expires: DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-        
     }
 }
