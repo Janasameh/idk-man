@@ -482,3 +482,16 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db3
+app.db
+app.sqlite
+*.db-shm
+*.db-wal
+
+# Entity Framework Migration files (optional - uncomment if you want to ignore)
+# Migrations/
