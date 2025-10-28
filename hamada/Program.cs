@@ -9,12 +9,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddMemoryCache();
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi(); // built-in OpenAPI generator
 
 // Register application services
 builder.Services.AddScoped<hamada.Repo.IUserRepository, hamada.Repo.UserRepository>();
 builder.Services.AddScoped<hamada.Services.IPasswordService, hamada.Services.PasswordService>();
+// Register concrete CachingService since controllers inject the concrete type
+builder.Services.AddScoped<hamada.Services.CachingService>();
 
 var jwtSettings = builder.Configuration.GetSection("jwt");
 var jwtKey = jwtSettings["key"];

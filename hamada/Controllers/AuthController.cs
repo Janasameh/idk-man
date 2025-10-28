@@ -8,7 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace YourApp.Controllers
+namespace hamada.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

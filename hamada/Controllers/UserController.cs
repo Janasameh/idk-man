@@ -17,14 +17,22 @@ namespace hamada.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(IUserRepository repo ) : ControllerBase
+    public class UserController(IUserRepository repo, hamada.Services.CachingService cachingService) : ControllerBase
     {
         [HttpGet]
         [Route("")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<User>?>> GetUsers()
         {
-            return await repo.GetUsers();
+            var users = await cachingService.GetUsersAsync();
+            return users;
+        }
+
+        [HttpPost("cache/invalidate")]
+        public IActionResult InvalidateUsersCache()
+        {
+            cachingService.InvalidateUsersCache();
+            return NoContent();
         }
 
         [HttpGet]
@@ -34,13 +42,5 @@ namespace hamada.Controllers
         {
             return await repo.GetUser(id);
         }
-       
-
-
-
-
-
-      
-
     }
 }
